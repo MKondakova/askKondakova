@@ -1,0 +1,30 @@
+{% extends 'include/base.html' %}
+{% load static %}
+
+{% block page_title %}Login{% endblock page_title %}
+{% block css %}
+    <link href="{% static 'css/login.css' %}" rel="stylesheet">
+{% endblock css %}
+{% block content %}
+    <h1 class="">Log In</h1>
+    <p id="result_text" class="hide">Result Text</p>
+    <form class="login-form" action="{% url 'new_questions' %}">
+        <div class="form-group row">
+            <label for="user_login" class="col-sm-2 col-form-label">Login</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control"
+                       placeholder="Use uppercase and lowercase letters, numbers, underscore and dash" id="user_login"
+                       required minlength="4"
+                       maxlength="25" pattern="^(?=.*[A-Za-z0-9]$)[A-Za-z][A-Za-z\d_-]{3,24}$">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="user_password" class="col-sm-2 col-form-label">Password</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="user_password" required minlength="6" maxlength="20">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Log in!</button>
+    </form>
+    <a href="{% url 'signup' %}">Create new account</a>
+{% endblock content %}

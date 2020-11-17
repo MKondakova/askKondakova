@@ -1,0 +1,8 @@
+<h3>Popular Tags</h3>
+{% for tag in tags %}
+    <a href="{% url 'tag_questions' tag %}">{{ tag }}</a>
+{% endfor %}
+<h3>Best Members</h3>
+{% for name in names %}
+    <p>{{ name }}</p>
+{% endfor %}

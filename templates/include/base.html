@@ -1,0 +1,31 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block page_title %}{% endblock page_title %}</title>
+    <link href="{% static "css/bootstrap/bootstrap.min.css" %}" rel="stylesheet">
+    <link href="{% static "css/navbar.css" %}" rel="stylesheet">
+    <link href="{% static "css/sidebar.css" %}" rel="stylesheet">
+    {% block css %}
+    {% endblock css %}
+</head>
+<body>
+<header>
+    {% include 'include/navbar.html' with tags=tags names=names %}
+</header>
+<main role="main" class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            {% block content %}
+            {% endblock content %}
+        </div>
+        <div class="col-md-4">
+            {% include 'include/sidebar.html' %}
+        </div>
+    </div>
+</main>
+<script src="{% static 'js/jquery-3.0.0.min.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+</body>
+</html>

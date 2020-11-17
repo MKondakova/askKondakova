@@ -1,0 +1,24 @@
+{% extends 'include/base.html' %}
+{% load static %}
+{% block page_title %}{{ question.title|title }}{% endblock page_title %}
+{% block css %}
+    <link href="{% static 'css/comment.css' %}" rel="stylesheet">
+    <link href="{% static 'css/question.css' %}" rel="stylesheet">
+{% endblock css %}
+{% block content %}
+    {% include 'include/question.html' with question=question %}
+    <hr>
+    {% for answer in question.answers %}
+        {% include 'include/comment.html' with answer=answer %}
+    {% empty %}
+        <h3>Where are no answers</h3>
+    {% endfor %}
+    <hr>
+    <form>
+        <div class="form-group row">
+            <label for="answer_text">Add answer</label>
+            <textarea class="form-control" id="answer_text" rows="6" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Answer</button>
+    </form>
+{% endblock content %}

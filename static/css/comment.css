@@ -1,0 +1,15 @@
+.comment {
+    margin-top: 24px;
+    padding: 8px 0px;
+    border: #66afe9 1px solid;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.avatar-holder {
+    margin-top: 20px;
+}
+
+.rating {
+    margin-top: 4px;
+}
