@@ -4,11 +4,12 @@
 {% block page_title %} AskKondakova {% endblock page_title %}
 {% block css %}
     <link href="{% static 'css/question.css' %}" rel="stylesheet">
+    <link href="{% static 'css/pagination.css' %}" rel="stylesheet">
 {% endblock css %}
 
 {% block content %}
     <h1 class="my-4">Hot questions
-        <small><a href="{% url 'hot' %}">New questions</a></small>
+        <small><a href="{% url 'new_questions' %}">New questions</a></small>
     </h1>
     <div>
         {% for question in questions %}
@@ -17,4 +18,5 @@
             <h2>There no questions here. <a href="{% url 'ask' %}">Ask</a> one!</h2>
         {% endfor %}
     </div>
+    {% include 'include/pagination.html' with page=page %}
 {% endblock content %}

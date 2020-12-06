@@ -3,6 +3,7 @@
 
 {% block page_title %} AskKondakova {% endblock page_title %}
 {% block css %}
+    <link href="{% static 'css/pagination.css' %}" rel="stylesheet">
     <link href="{% static 'css/question.css' %}" rel="stylesheet">
 {% endblock css %}
 
@@ -17,5 +18,5 @@
             <h2>There no questions here. <a href="{% url 'ask' %}">Ask</a> one!</h2>
         {% endfor %}
     </div>
-    {% include 'include/pagination.html' %}
+    {% include 'include/pagination.html' with page=page %}
 {% endblock content %}

@@ -1,5 +1,8 @@
+from django.core.paginator import Paginator, EmptyPage
+from django.http import Http404
 from django.shortcuts import render
 
+MAX_ELEMENTS_IN_PAGE = 10
 questions = [
     {
         'title': f'title {idx}',
@@ -33,7 +36,7 @@ questions.append({
     'text': ('some text' * 50),
     'rating': 2312,
     'answer_count': 0,
-    'tags': ['taag1', 'tag2', 'tagn', ],
+    'tags': ['tag1', 'tag2', 'tagn', ],
     'answers': [{'text': 'first answer!!!!!',
                  'id': 0,
                  'rating': -4, } for i in range(15)]})
@@ -42,36 +45,52 @@ tags = [f'tag{idx}' for idx in range(10)]
 names = [f'name{idx}' for idx in range(10)]
 
 
+def paginate(request, qs):
+    try:
+        limit = int(request.GET.get('limit', MAX_ELEMENTS_IN_PAGE))
+    except ValueError:
+        limit = MAX_ELEMENTS_IN_PAGE
+    if limit > 100:
+        limit = MAX_ELEMENTS_IN_PAGE
+    try:
+        page = int(request.GET.get('page', 1))
+    except ValueError:
+        raise Http404
+    paginator = Paginator(qs, limit)
+    try:
+        page = paginator.page(page)
+    except EmptyPage:
+        page = paginator.page(paginator.num_pages)
+    return page
+
+
+# можно еще всех страниц количество выводить
 def new_questions(request):
-    # object_list = questions
-    # paginator = Paginator(object_list, 5)
-    # page = request.GET.get('page')
-    # try :
-    #     questions_list = paginator.page(page)
-    # except PageNotAnInteger:
-    #     questions_list = paginator.page(1)
-    # except EmptyPage:
-    #     questions_list = paginator.page(paginator.num_pages)
+    page = paginate(request, questions)
     return render(request, 'new_questions.html', {
-        'questions': questions,
-        'page': 0,
+        'questions': page.object_list,
+        'page': page,
         'tags': tags,
         'names': names,
     })
 
 
 def hot_questions(request):
+    page = paginate(request, questions)
     return render(request, 'hot_questions.html', {
-        'questions': questions,
+        'questions': page.object_list,
+        'page' : page,
         'tags': tags,
         'names': names,
     })
 
 
 def tag_news(request, tag_type):
+    page = paginate(request, list(filter(lambda question: (tags.count(tag_type) > 0), questions)))
     return render(request, 'tag_page.html', {
-        'tag' : tag_type,
-        'questions': questions,
+        'tag': tag_type,
+        'questions': page.object_list,
+        'page': page,
         'tags': tags,
         'names': names,
     })
