@@ -1,7 +1,9 @@
 from django.core.paginator import Paginator, EmptyPage
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404, get_list_or_404
+from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
+from django.contrib.auth import authenticate, login, logout
 from .models import *
+from .forms import *
 
 MAX_ELEMENTS_IN_PAGE = 10
 
@@ -40,12 +42,9 @@ def new_questions(request):
 
 
 def hot_questions(request):
-    try:
-        questions = Question.objects.hot_questions()
-        tags = Tag.objects.all()
-        names = User.objects.all()
-    except ...:
-        raise Http404
+    questions = Question.objects.hot_questions()
+    tags = Tag.objects.all()
+    names = User.objects.all()
 
     page = paginate(request, questions)
     return render(request, 'hot_questions.html', {
@@ -57,12 +56,9 @@ def hot_questions(request):
 
 
 def tag_news(request, tag_type):
-    try:
-        questions = Question.objects.questions_by_tag(tag_type)
-        tags = Tag.objects.all()
-        names = User.objects.all()
-    except ...:
-        raise Http404
+    questions = Question.objects.questions_by_tag(tag_type)
+    tags = Tag.objects.all()
+    names = User.objects.all()
 
     page = paginate(request, questions)
     return render(request, 'tag_page.html', {
@@ -75,13 +71,9 @@ def tag_news(request, tag_type):
 
 
 def question_page(request, question_id=0):
-
-    try:
-        question = Question.objects.get(id=question_id)
-        tags = Tag.objects.all()
-        names = User.objects.all()
-    except ...:
-        raise Http404
+    question = get_object_or_404(Question, id=question_id)
+    tags = Tag.objects.all()
+    names = User.objects.all()
 
     return render(request, 'question_page.html', {
         'question': question,
@@ -91,17 +83,30 @@ def question_page(request, question_id=0):
 
 
 def login_page(request):
+    if request.method == 'GET':
+        form = LoginForm()
+    else:
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            user = authenticate(request, **form.cleaned_data)
+            if user is not None:
+                login(request, user)
+                return redirect('/')  # todo normal urls with params
+            else:
+                form.add_error(None, "Wrong pair")
     try:
         tags = Tag.objects.all()
         names = User.objects.all()
     except ...:
         raise Http404
+    context = {'form': form, 'tags': tags,
+               'names': names, }
+    return render(request, 'login.html', context)
 
-    return render(request, 'login.html', {
-        'tags': tags,
-        'names': names,
-    })
 
+def logout_page(request):
+    logout(request)
+    return redirect('/')
 
 def signup_page(request):
     try:

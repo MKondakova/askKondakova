@@ -1,23 +1,61 @@
 from django.core.management.base import BaseCommand, CommandError
-from app.models import Question, User, Tag, Answer
+from app.models import Question, User, Tag, Answer, Profile
 from faker import Faker
 from random import choice
 
 f = Faker()
 
+quantity_values = {
+    'small': {
+        'questions': 50,
+        'answers': 100,
+        'tags': 30,
+        'users': 10
+    },
+    'medium': {
+        'questions': 100,
+        'answers': 300,
+        'tags': 100,
+        'users': 50
+    },
+    'large': {
+        'questions': 1000,
+        'answers': 2000,
+        'tags': 500,
+        'users': 500
+    }
+}
+
 
 class Command(BaseCommand):
     help = 'Enter database size: small, medium or large'
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-s',
+            '--size',
+            nargs='?',
+            type=str,
+            action='store',
+            choices=[
+                'small',
+                'medium',
+                'large',
+            ],
+            default='small'
+        )
+
     def handle(self, *args, **options):
-        self.fill_users(10)
-        self.fill_tags(10)
-        self.fill_questions(40)
-        self.fill_answers(100)
+        quantity = quantity_values[options['size']]
+        self.fill_users(quantity['users'])
+        self.fill_tags(quantity['tags'])
+        self.fill_questions(quantity['questions'])
+        self.fill_answers(quantity['answers'])
 
     def fill_tags(self, count):
+        names = f.words(nb=count, unique=True)
         for i in range(count):
-            Tag.objects.create(name=f.word())
+            Tag.objects.create(name=names[i])
 
     def fill_questions(self, count):
         author_ids = list(
@@ -36,8 +74,11 @@ class Command(BaseCommand):
                 question.tags.add(choice(tags))
 
     def fill_users(self, count):
+        avatars = ['avatars/bee.jpg', 'avatars/cat.jpg', 'avatars/tomato.png',
+                   'avatars/unicorn.jpg', 'avatars/pigeon.jpeg', 'avatars/tiger.jpeg']
         for i in range(count):
-            User.objects.create_user(username=f.user_name(), email=f.email())
+            user = User.objects.create_user(username=f.user_name(), email=f.email())
+            Profile.objects.create(avatar=choice(avatars), user=user)
 
     def fill_answers(self, count):
         question_ids = list(
@@ -53,4 +94,3 @@ class Command(BaseCommand):
                 question_id=choice(question_ids),
                 text='. '.join(f.sentences(f.random_int(min=2, max=5))),
             )
-

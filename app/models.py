@@ -3,8 +3,8 @@ from django.contrib.auth.models import User
 
 
 class Profile(models.Model):
-    avatar = models.CharField(max_length=50)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(upload_to='avatars', default='avatars/default_pic.png')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
 
 
 class Tag(models.Model):
@@ -22,7 +22,7 @@ class QuestionManager(models.Manager):
         return self.order_by('-rating')
 
     def questions_by_tag(self, tag):
-        return self.filter(tags__contains='tag')
+        return self.filter(tags__name__contains=tag)
 
 
 class Question(models.Model):
@@ -30,9 +30,12 @@ class Question(models.Model):
     text = models.TextField(verbose_name='Текст')
     added_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
     tags = models.ManyToManyField(Tag)
-    rating = models.IntegerField
+    rating = models.IntegerField(default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     objects = QuestionManager()
+
+    def answer_count(self):
+        return self.answers.count()
 
     def __str__(self):
         return self.title + " " + self.author.__str__()
@@ -46,7 +49,7 @@ class AnswerManager(models.Manager):
 
 class Answer(models.Model):
     added_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     rating = models.IntegerField(default=0)

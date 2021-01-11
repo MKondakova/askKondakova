@@ -3,7 +3,7 @@
 <div class="comment row">
     <div class="col-md-2">
         <div class="avatar_holder">
-            <img width="64" height="64" class="img-rounded" src="{% static 'img/avatar.jpeg' %}">
+            <img width="64" height="64" class="img-rounded" src="{{ answer.author.profile.avatar.url }}">
             <div class="rating">
                 <button type="button" class="btn btn-sm btn-default">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down-fill"

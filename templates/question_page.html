@@ -8,7 +8,7 @@
 {% block content %}
     {% include 'include/question.html' with question=question %}
     <hr>
-    {% for answer in question.answers %}
+    {% for answer in question.answers.all %}
         {% include 'include/comment.html' with answer=answer %}
     {% empty %}
         <h3>Where are no answers</h3>
