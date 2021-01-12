@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
@@ -93,7 +94,7 @@ def login_page(request):
                 login(request, user)
                 return redirect('/')  # todo normal urls with params
             else:
-                form.add_error(None, "Wrong pair")
+                form.add_error(None, "Wrong pair login and password")
     try:
         tags = Tag.objects.all()
         names = User.objects.all()
@@ -106,27 +107,46 @@ def login_page(request):
 
 def logout_page(request):
     logout(request)
-    return redirect('/')
+    return redirect('new_questions')
 
-def signup_page(request):
+
+def sign_up_page(request):
+    if request.method == 'GET':
+        form = RegistrationForm()
+    else:
+        form = RegistrationForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('new_questions')
     try:
         tags = Tag.objects.all()
         names = User.objects.all()
     except ...:
         raise Http404
     return render(request, 'sign_up.html', {
+        'form': form,
         'tags': tags,
         'names': names,
     })
 
 
+@login_required
 def new_question(request):
+    if request.method == 'GET':
+        form = QuestionForm(request.user)
+    else:
+        form = QuestionForm(request.user, request.POST)
+        if form.is_valid():
+            question = form.save()
+            return redirect('question', question.pk)
+
     try:
         tags = Tag.objects.all()
         names = User.objects.all()
     except ...:
         raise Http404
     return render(request, 'new_question.html', {
+        'form': form,
         'tags': tags,
         'names': names,
     })
