@@ -1,17 +1,20 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Question, Answer, User, Profile
+from django.db import transaction
+
+from .models import Question, Answer, User, Profile, Tag, MAX_TITLE_LENGTH, MAX_TAG_LENGTH, MAX_NICK_NAME_LENGTH, \
+    MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_TAGS_PER_QUESTION
 
 
 class LoginForm(forms.Form):
-    username = forms.CharField()
-    password = forms.CharField(widget=forms.PasswordInput)
+    username = forms.CharField(max_length=MAX_USERNAME_LENGTH)
+    password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
 
 
 class RegistrationForm(forms.ModelForm):
-    nick_name = forms.CharField(max_length=30)
-    password = forms.CharField(widget=forms.PasswordInput)
-    repeat_password = forms.CharField(widget=forms.PasswordInput)
+    nick_name = forms.CharField(max_length=MAX_NICK_NAME_LENGTH)
+    password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
+    repeat_password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
     avatar = forms.ImageField()
 
     def save(self, commit=True):
@@ -38,17 +41,31 @@ class RegistrationForm(forms.ModelForm):
 
 
 class QuestionForm(forms.ModelForm):
-    # tags = forms.CharField()
+    tags = forms.CharField(help_text='Enter tags with whitespaces. Length of tag must be less then %s symbols' % MAX_TAG_LENGTH)
 
     def __init__(self, user, *args, **kwargs):
         self._user = user
         super(QuestionForm, self).__init__(*args, **kwargs)
 
+    def clean_tags(self):
+        tags = self.cleaned_data['tags']
+        tags = tags.split()
+        if len(tags) > MAX_TAGS_PER_QUESTION:
+            raise ValidationError('Too many tags. Use no more then %(value)s tags',
+                                  params={'value': MAX_TAGS_PER_QUESTION})
+        is_correct = all((lambda tag: len(tag) <= MAX_TAG_LENGTH) for tag in tags)
+        if not is_correct:
+            raise ValidationError('One of tags too long')
+        return tags
+
     def save(self, commit=True):
-        self.cleaned_data['author'] = self._user
+        question = Question(title=self.cleaned_data['title'], text=self.cleaned_data['text'], author=self._user)
         if commit:
-            return Question.objects.create(**self.cleaned_data)
-        return Question(**self.cleaned_data)
+            question.save()
+            with transaction.atomic():
+                tags = [Tag.objects.get_or_create(name=tag)[0] for tag in self.cleaned_data['tags']]
+            question.tags.set(tags)
+        return question
 
     class Meta:
         model = Question
