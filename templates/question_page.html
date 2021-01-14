@@ -1,4 +1,5 @@
 {% extends 'include/base.html' %}
+{% load bootstrap4 %}
 {% load static %}
 {% block page_title %}{{ question.title|title }}{% endblock page_title %}
 {% block css %}
@@ -11,14 +12,20 @@
     {% for answer in question.answers.all %}
         {% include 'include/comment.html' with answer=answer %}
     {% empty %}
-        <h3>Where are no answers</h3>
+        <h3>There are no answers</h3>
     {% endfor %}
     <hr>
-    <form>
-        <div class="form-group row">
-            <label for="answer_text">Add answer</label>
-            <textarea class="form-control" id="answer_text" rows="6" required></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Answer</button>
+    {% if request.user.is_authenticated %}
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Post</button>
+        {% endbuttons %}
     </form>
+    {% else %}
+        <p>You should login to add answer</p>
+        <a class="nav-link" href="{% url 'login' %}">Login</a>
+    {% endif %}
+
 {% endblock content %}

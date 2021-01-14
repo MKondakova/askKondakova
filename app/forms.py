@@ -14,12 +14,14 @@ class RegistrationForm(forms.ModelForm):
     repeat_password = forms.CharField(widget=forms.PasswordInput)
     avatar = forms.ImageField()
 
-    def save(self):
-        user = User.objects.create_user(self.cleaned_data.get('username'), self.cleaned_data.get('email'),
-                                        self.cleaned_data.get('password'), )
-        profile = Profile.objects.create(nick_name=self.cleaned_data.get('nick_name'), user=user)
+    def save(self, commit=True):
+        user = User(self.cleaned_data.get('username'), self.cleaned_data.get('email'),
+                    self.cleaned_data.get('password'), )
+        profile = Profile(nick_name=self.cleaned_data.get('nick_name'), user=user)
         if self.cleaned_data.get('avatar') is not None:
             profile.avatar = self.cleaned_data.get('avatar')
+        if commit:
+            user.save()
             profile.save()
         return user
 
@@ -42,9 +44,11 @@ class QuestionForm(forms.ModelForm):
         self._user = user
         super(QuestionForm, self).__init__(*args, **kwargs)
 
-    def save(self):
+    def save(self, commit=True):
         self.cleaned_data['author'] = self._user
-        return Question.objects.create(**self.cleaned_data)
+        if commit:
+            return Question.objects.create(**self.cleaned_data)
+        return Question(**self.cleaned_data)
 
     class Meta:
         model = Question
@@ -52,9 +56,42 @@ class QuestionForm(forms.ModelForm):
 
 
 class AnswerForm(forms.ModelForm):
+    def __init__(self, user, question_id, *args, **kwargs):
+        self._user = user
+        self._question_id = question_id
+        super(AnswerForm, self).__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        self.cleaned_data['author'] = self._user
+        answer = Answer(**self.cleaned_data)
+        answer.question_id = self._question_id
+        if commit:
+            answer.save()
+        return answer
+
     class Meta:
         model = Answer
         fields = ['text']
 
 
-class ProfileEditForm(forms.Form): pass
+class SettingsForm(forms.ModelForm):
+    email = forms.EmailField(widget=forms.EmailInput)
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get('instance', None)
+        super(SettingsForm, self).__init__(*args, **kwargs)
+        if instance:
+            email = instance.user.email
+            self.fields["email"].initial = email
+
+    def save(self, commit=True):
+        profile = super(SettingsForm, self).save(commit)
+        if commit and self.has_changed() and 'email' in self.changed_data:
+            user = self.instance.user
+            user.email = self.cleaned_data.get('email')
+            user.save()
+        return profile
+
+    class Meta:
+        model = Profile
+        fields = ['nick_name', 'avatar']

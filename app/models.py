@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Profile(models.Model):
-    avatar = models.ImageField(upload_to='avatars', default='avatars/default_pic.png')
+    avatar = models.ImageField(upload_to='avatars', default='avatars/default_pic.png') #todo add upload time
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     nick_name = models.CharField(max_length=30, default="sdsasdfaf")
 

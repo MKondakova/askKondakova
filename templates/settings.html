@@ -1,0 +1,18 @@
+{% extends 'include/base.html' %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block page_title %}Sign up{% endblock page_title %}
+{% block css %}
+    <link href="{% static 'css/sign_up.css' %}" rel="stylesheet">
+{% endblock css %}
+{% block content %}
+    <h1 class="">Settings</h1>
+    <form enctype="multipart/form-data" class="sign-up-form" method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% buttons %}
+            <button type="submit" class="btn btn-primary">Save</button>
+        {% endbuttons %}
+    </form>
+{% endblock content %}

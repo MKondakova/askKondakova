@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
+from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from .models import *
 from .forms import *
@@ -71,12 +72,21 @@ def tag_news(request, tag_type):
     })
 
 
-def question_page(request, question_id=0):
+def question_page(request, question_id):
     question = get_object_or_404(Question, id=question_id)
+    if request.method == 'GET':
+        form = AnswerForm(request.user, question_id)
+    else:
+        form = AnswerForm(request.user, question_id, request.POST)
+        if form.is_valid():
+            answer = form.save()
+            return redirect(reverse('question', kwargs={'question_id': question_id}) + '#answer_' + str(answer.id))
+
     tags = Tag.objects.all()
     names = User.objects.all()
 
     return render(request, 'question_page.html', {
+        'form': form,
         'question': question,
         'tags': tags,
         'names': names,
@@ -110,13 +120,34 @@ def logout_page(request):
     return redirect('new_questions')
 
 
+@login_required()
+def settings_page(request):
+    if request.method == 'GET':
+        form = SettingsForm(instance=request.user.profile)
+    else:
+        form = SettingsForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+    try:
+        tags = Tag.objects.all()
+        names = User.objects.all()
+    except ...:
+        raise Http404
+    return render(request, 'settings.html', {
+        'form': form,
+        'tags': tags,
+        'names': names,
+    })
+
+
 def sign_up_page(request):
     if request.method == 'GET':
         form = RegistrationForm()
     else:
         form = RegistrationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            login(request, user)
             return redirect('new_questions')
     try:
         tags = Tag.objects.all()
