@@ -20,3 +20,6 @@
     </div>
     {% include 'include/pagination.html' with page=page %}
 {% endblock content %}
+{% block js %}
+    <script src="{% static 'js/vote.js' %}"></script>
+{% endblock js %}

@@ -1,6 +1,7 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.core.paginator import Paginator, EmptyPage
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import render, get_object_or_404, get_list_or_404, redirect
 from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
@@ -33,7 +34,7 @@ def paginate(request, qs):
 def new_questions(request):
     questions = Question.objects.new_questions()
     tags = Tag.objects.all()
-    names = User.objects.all()
+    names = User.objects.all()[:10]
     page = paginate(request, questions)
     return render(request, 'new_questions.html', {
         'questions': page.object_list,
@@ -46,7 +47,7 @@ def new_questions(request):
 def hot_questions(request):
     questions = Question.objects.hot_questions()
     tags = Tag.objects.all()
-    names = User.objects.all()
+    names = User.objects.all()[:10]
 
     page = paginate(request, questions)
     return render(request, 'hot_questions.html', {
@@ -60,7 +61,7 @@ def hot_questions(request):
 def tag_news(request, tag_type):
     questions = Question.objects.questions_by_tag(tag_type)
     tags = Tag.objects.all()
-    names = User.objects.all()
+    names = User.objects.all()[:10]
 
     page = paginate(request, questions)
     return render(request, 'tag_page.html', {
@@ -83,7 +84,7 @@ def question_page(request, question_id):
             return redirect(reverse('question', kwargs={'question_id': question_id}) + '#answer_' + str(answer.id))
 
     tags = Tag.objects.all()
-    names = User.objects.all()
+    names = User.objects.all()[:10]
 
     return render(request, 'question_page.html', {
         'form': form,
@@ -107,7 +108,7 @@ def login_page(request):
                 form.add_error(None, "Wrong pair login and password")
     try:
         tags = Tag.objects.all()
-        names = User.objects.all()
+        names = User.objects.all()[:10]
     except ...:
         raise Http404
     context = {'form': form, 'tags': tags,
@@ -120,7 +121,7 @@ def logout_page(request):
     return redirect('new_questions')
 
 
-@login_required()
+@login_required
 def settings_page(request):
     if request.method == 'GET':
         form = SettingsForm(instance=request.user.profile)
@@ -129,8 +130,8 @@ def settings_page(request):
         if form.is_valid():
             form.save()
     try:
-        tags = Tag.objects.all()
-        names = User.objects.all()
+        tags = Tag.objects.all()[:20]
+        names = User.objects.all()[:10]
     except ...:
         raise Http404
     return render(request, 'settings.html', {
@@ -151,7 +152,7 @@ def sign_up_page(request):
             return redirect('new_questions')
     try:
         tags = Tag.objects.all()
-        names = User.objects.all()
+        names = User.objects.all()[:10]
     except ...:
         raise Http404
     return render(request, 'sign_up.html', {
@@ -173,7 +174,7 @@ def new_question(request):
 
     try:
         tags = Tag.objects.all()
-        names = User.objects.all()
+        names = User.objects.all()[:10]
     except ...:
         raise Http404
     return render(request, 'new_question.html', {
@@ -181,3 +182,10 @@ def new_question(request):
         'tags': tags,
         'names': names,
     })
+
+
+@require_POST
+@login_required
+def vote(request):
+    data = request.POST
+    return JsonResponse({'qrating': 42})
