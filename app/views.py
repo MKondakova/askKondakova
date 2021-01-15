@@ -30,7 +30,6 @@ def paginate(request, qs):
     return page
 
 
-# можно еще всех страниц количество выводить
 def new_questions(request):
     questions = Question.objects.new_questions()
     tags = Tag.objects.all()
@@ -97,13 +96,14 @@ def question_page(request, question_id):
 def login_page(request):
     if request.method == 'GET':
         form = LoginForm()
+        request.session['next_url'] = request.GET.get('next', '/')
     else:
         form = LoginForm(data=request.POST)
         if form.is_valid():
             user = authenticate(request, **form.cleaned_data)
             if user is not None:
                 login(request, user)
-                return redirect('/')  # todo normal urls with params
+                return redirect(request.session.pop('next_url', '/'))
             else:
                 form.add_error(None, "Wrong pair login and password")
     try:

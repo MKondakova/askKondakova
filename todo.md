@@ -1,6 +1,6 @@
 [ ] add slags instead id in urls
 
-[ ] [page 15](https://github.com/mialinx/tp-stepic/blob/master/lesson-13/lesson.pdf) 
+[x] [page 15](https://github.com/mialinx/tp-stepic/blob/master/lesson-13/lesson.pdf) 
 check best practice paginator
 
 [ ] add likes and view 
