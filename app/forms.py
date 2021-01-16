@@ -18,9 +18,10 @@ class RegistrationForm(forms.ModelForm):
     avatar = forms.ImageField()
 
     def save(self, commit=True):
-        user = User(self.cleaned_data.get('username'), self.cleaned_data.get('email'),
-                    self.cleaned_data.get('password'), )
+        user = User(username=self.cleaned_data.get('username'), email=self.cleaned_data.get('email'),
+                    password=self.cleaned_data.get('password'), )
         profile = Profile(nick_name=self.cleaned_data.get('nick_name'), user=user)
+
         if self.cleaned_data.get('avatar') is not None:
             profile.avatar = self.cleaned_data.get('avatar')
         if commit:

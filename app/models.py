@@ -89,7 +89,7 @@ class VoteManager(models.Manager):
 class QuestionVote(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     isLike = models.BooleanField()
-    rate_object = models.ForeignKey(Question, on_delete=models.CASCADE)
+    rate_object = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="votes")
 
     objects = VoteManager
 
@@ -97,7 +97,6 @@ class QuestionVote(models.Model):
 class AnswerVote(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     isLike = models.BooleanField()
-    rate_object = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    rate_object = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="votes")
 
     objects = VoteManager
-

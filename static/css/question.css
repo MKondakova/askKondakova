@@ -17,3 +17,7 @@
 .rating {
     margin-top: 4px;
 }
+
+.selected {
+    border-color: lightskyblue;
+}

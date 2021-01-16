@@ -1,11 +1,13 @@
 {% load static %}
+{% load likes_extras %}
 
 <div class="question row">
     <div class="col-md-2">
         <div class="avatar-holder">
             <img width="64" height="64" class="img-rounded" src="{{ question.author.profile.avatar.url }}">
             <div class="rating">
-                <button type="button" class="btn btn-sm btn-default js-vote" data-action="like" data-qid="{{ question.id }}">
+            {% has_vote question.votes.all question.id request.user.id as vote %}
+                <button type="button" class="btn btn-sm btn-default js-vote {% if vote == 1 %}selected{% endif %}" data-action="like" data-qid="{{ question.id }}">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">
@@ -13,7 +15,7 @@
                     </svg>
                 </button>
                 <div id="rating-{{ question.id }}">{{ question.rating }}</div>
-                <button type="button" class="js-vote btn btn-sm btn-default" data-action="dislike" data-qid="{{ question.id }}">
+                <button type="button" class="js-vote btn btn-sm btn-default {% if vote == -1 %}selected{% endif %}" data-action="dislike" data-qid="{{ question.id }}">
                     <svg width="1em" height="1em" viewBox="0 0 18 16" class="bi bi-caret-down-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">
