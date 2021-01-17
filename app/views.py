@@ -186,6 +186,23 @@ def new_question(request):
 
 
 @require_POST
+def make_correct(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'redirect': request.build_absolute_uri(LOGIN_URL)})
+    data = request.POST
+    answer_id = data['answer_id']
+    question_id = data['question_id']
+    correct_answer = Answer.objects.get_correct_answer(question_id)
+    if len(correct_answer) == 1:
+        correct_answer[0].is_correct = False
+        correct_answer[0].save()
+    current_answer = Answer.objects.get(id=answer_id)
+    current_answer.is_correct = True
+    current_answer.save()
+    return JsonResponse({})
+
+
+@require_POST
 def vote(request):
     if not request.user.is_authenticated:
         return JsonResponse({'redirect': request.build_absolute_uri(LOGIN_URL)})
@@ -198,14 +215,13 @@ def vote(request):
     rate_object_model = Question if object_type == 'question' else Answer
     try:
         q = vote_model.objects.get(author_id=request.user.id,
-                              rate_object_id=rate_object_id, )
+                                   rate_object_id=rate_object_id, )
         if q.is_like == is_like:
             q.delete()
         else:
             q.is_like = is_like
             q.save()
     except vote_model.DoesNotExist:
-        print("not exist")
         q = vote_model(
             author_id=request.user.id,
             rate_object_id=rate_object_id,

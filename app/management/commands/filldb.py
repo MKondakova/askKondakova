@@ -112,13 +112,15 @@ class Command(BaseCommand):
             User.objects.values_list('id', flat=True)
         )
         for i in range(count):
+            user_id = choice(user_ids)
+            answer_id = choice(answer_ids)
             try:
-                a = AnswerVote.objects.get(author_id=choice(user_ids),
-                                           rate_object_id=choice(answer_ids), )
+                a = AnswerVote.objects.get(author_id=user_id,
+                                           rate_object_id=answer_id, )
             except AnswerVote.DoesNotExist:
                 a = AnswerVote(
-                    author_id=choice(user_ids),
-                    rate_object_id=choice(answer_ids),
+                    author_id=user_id,
+                    rate_object_id=answer_id,
                 )
             a.is_like = choice([True, False])
             a.save()
@@ -134,13 +136,15 @@ class Command(BaseCommand):
             User.objects.values_list('id', flat=True)
         )
         for i in range(count):
+            user_id = choice(user_ids)
+            question_id = choice(question_ids)
             try:
-                q = QuestionVote.objects.get(author_id=choice(user_ids),
-                                             rate_object_id=choice(question_ids), )
+                q = QuestionVote.objects.get(author_id=user_id,
+                                             rate_object_id=question_id, )
             except QuestionVote.DoesNotExist:
                 q = QuestionVote(
-                    author_id=choice(user_ids),
-                    rate_object_id=choice(question_ids),
+                    author_id=user_id,
+                    rate_object_id=question_id,
                 )
             q.is_like = choice([True, False])
             q.save()

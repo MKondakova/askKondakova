@@ -11,25 +11,6 @@ $('.rating').each(function (ev) {
             method: 'POST',
             data: {action: action, rate_object_id: rate_object_id, type: type},
             dataType: "json",
-            /*statusCode: {
-                302: function (data) {
-                    console.log("log")
-                    if (data['redirect']) {
-                    console.log("wind")
-                        window.location = data['redirect'];
-                    }
-                },
-                200: function (data) {
-                    if ($this.hasClass('selected')) {
-                        $this.removeClass('selected')
-                    } else {
-                        btns.removeClass('selected')
-                        $this.addClass('selected')
-                    }
-                    rating_field.html(data.qrating);
-                }
-
-            },*/
         }).done(function (data) {
             if (data['redirect']) {
                 console.log(data['redirect'])

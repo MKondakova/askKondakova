@@ -8,7 +8,6 @@
 {% endblock css %}
 {% block content %}
     <h1 class="">Log In</h1>
-    <p id="result_text" class="hide">Result Text</p>
     <form class="login-form" method="post">
         {% csrf_token %}
         {% bootstrap_form form %}

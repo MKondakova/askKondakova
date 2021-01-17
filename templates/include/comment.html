@@ -1,14 +1,14 @@
 {% load likes_extras %}
 {% load static %}
 
-<div class="comment row"  id="answer_{{ answer.id }}">
+<div class="comment row" id="answer_{{ answer.id }}">
     <div class="col-md-2">
         <div class="avatar-holder">
             <img width="64" height="64" class="img-rounded" src="{{ answer.author.profile.avatar.url }}">
             <div class="rating">
-            {% has_vote answer.votes.all answer.id request.user.id as vote %}
+                {% has_vote answer.votes.all answer.id request.user.id as vote %}
                 <button type="button" class="js-vote-btn btn btn-sm btn-default {% if vote == 1 %}selected{% endif %}"
-                data-action="like" data-qid="{{ answer.id }}" data-type="answer">
+                        data-action="like" data-qid="{{ answer.id }}" data-type="answer">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">
@@ -17,7 +17,7 @@
                 </button>
                 <div class="rating-field">{{ answer.rating }}</div>
                 <button type="button" class="js-vote-btn btn btn-sm btn-default {% if vote == -1 %}selected{% endif %}"
-                data-action="dislike" data-qid="{{ answer.id }}" data-type="answer">
+                        data-action="dislike" data-qid="{{ answer.id }}" data-type="answer">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">
@@ -30,8 +30,11 @@
     <div class="col-md-10">
         <p>{{ answer.text }}</p>
         <div class="custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" id="correct_check-{{ answer.id }}">
-            <label class="custom-control-label" for="correct_check-{{ answer.id }}">Correct!</label>
+                <img width="64" height="64" src="{% static 'img/correct.png' %}" class="js-correct-check {% if not answer.is_correct %} hide {% endif %}">
+            {% if request.user.id == answer.question.author.id %}
+                <input type="checkbox" class="custom-control-input js-correct-input" id="check-{{ answer.id }}" data-answerid="{{ answer.id }}" data-questionid="{{ answer.question.id }}">
+                <label class="custom-control-label {% if answer.is_correct %} hide {% endif %}" for="check-{{ answer.id }}">Correct!</label>
+            {% endif %}
         </div>
     </div>
 </div>

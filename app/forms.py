@@ -15,7 +15,7 @@ class RegistrationForm(forms.ModelForm):
     nick_name = forms.CharField(max_length=MAX_NICK_NAME_LENGTH)
     password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
     repeat_password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
-    avatar = forms.ImageField()
+    avatar = forms.ImageField(required=False)
 
     def save(self, commit=True):
         user = User(username=self.cleaned_data.get('username'), email=self.cleaned_data.get('email'),
@@ -42,7 +42,7 @@ class RegistrationForm(forms.ModelForm):
 
 
 class QuestionForm(forms.ModelForm):
-    tags = forms.CharField(help_text='Enter tags with whitespaces. Length of tag must be less then %s symbols' % MAX_TAG_LENGTH)
+    tags = forms.CharField(help_text='Enter tags with whitespaces. Length of tag must be less then %s symbols' % MAX_TAG_LENGTH, required=False)
 
     def __init__(self, user, *args, **kwargs):
         self._user = user

@@ -47,7 +47,6 @@ class Question(models.Model):
     tags = models.ManyToManyField(Tag)
     rating = models.IntegerField(default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    correctAnswer = models.BooleanField(default=False)
 
     objects = QuestionManager()
 
@@ -66,6 +65,9 @@ class AnswerManager(models.Manager):
     def get_answers(self, question):
         return self.filter(question=question).order_by('added_at')
 
+    def get_correct_answer(self, question_id):
+        return self.filter(question_id=question_id, is_correct=True)
+
 
 class Answer(models.Model):
     added_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата и время создания')
@@ -74,6 +76,7 @@ class Answer(models.Model):
     text = models.TextField()
     rating = models.IntegerField(default=0)
     objects = AnswerManager()
+    is_correct = models.BooleanField(default=False)
 
     def update_rating(self):
         self.rating = AnswerVote.objects.get_rating(self.id)
