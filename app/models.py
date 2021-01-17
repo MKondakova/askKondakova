@@ -51,6 +51,10 @@ class Question(models.Model):
 
     objects = QuestionManager()
 
+    def update_rating(self):
+        self.rating = QuestionVote.objects.get_rating(self.id)
+        self.save()
+
     def answer_count(self):
         return self.answers.count()
 
@@ -71,16 +75,20 @@ class Answer(models.Model):
     rating = models.IntegerField(default=0)
     objects = AnswerManager()
 
+    def update_rating(self):
+        self.rating = AnswerVote.objects.get_rating(self.id)
+        self.save()
+
     def __str__(self):
         return self.author.username + " " + self.added_at.__str__()
 
 
 class VoteManager(models.Manager):
     def get_likes(self, primary_key):
-        return self.filter(rate_object=primary_key, isLike=True).count()
+        return self.filter(rate_object=primary_key, is_like=True).count()
 
     def get_dislikes(self, primary_key):
-        return self.filter(rate_object=primary_key, isLike=False).count()
+        return self.filter(rate_object=primary_key, is_like=False).count()
 
     def get_rating(self, primary_key):
         return self.get_likes(primary_key) - self.get_dislikes(primary_key)
@@ -88,15 +96,13 @@ class VoteManager(models.Manager):
 
 class QuestionVote(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    isLike = models.BooleanField()
+    is_like = models.BooleanField()
     rate_object = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="votes")
-
-    objects = VoteManager
+    objects = VoteManager()
 
 
 class AnswerVote(models.Model):
+    objects = VoteManager()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    isLike = models.BooleanField()
+    is_like = models.BooleanField()
     rate_object = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name="votes")
-
-    objects = VoteManager

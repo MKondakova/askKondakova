@@ -6,16 +6,18 @@
         <div class="avatar-holder">
             <img width="64" height="64" class="img-rounded" src="{{ question.author.profile.avatar.url }}">
             <div class="rating">
-            {% has_vote question.votes.all question.id request.user.id as vote %}
-                <button type="button" class="btn btn-sm btn-default js-vote {% if vote == 1 %}selected{% endif %}" data-action="like" data-qid="{{ question.id }}">
+                {% has_vote question.votes.all question.id request.user.id as vote %}
+                <button type="button" class="js-vote-btn btn btn-sm btn-default {% if vote == 1 %}selected{% endif %}"
+                        data-action="like" data-qid="{{ question.id }}" data-type="question">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.247 4.86l-4.796 5.481c-.566.647-.106 1.659.753 1.659h9.592a1 1 0 0 0 .753-1.659l-4.796-5.48a1 1 0 0 0-1.506 0z"></path>
                     </svg>
                 </button>
-                <div id="rating-{{ question.id }}">{{ question.rating }}</div>
-                <button type="button" class="js-vote btn btn-sm btn-default {% if vote == -1 %}selected{% endif %}" data-action="dislike" data-qid="{{ question.id }}">
+                <div class="rating-field">{{ question.rating }}</div>
+                <button type="button" class="js-vote-btn btn btn-sm btn-default {% if vote == -1 %}selected{% endif %}"
+                        data-action="dislike" data-qid="{{ question.id }}" data-type="question">
                     <svg width="1em" height="1em" viewBox="0 0 18 16" class="bi bi-caret-down-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">

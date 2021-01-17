@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.contrib.auth import authenticate, login, logout
 from .models import *
 from .forms import *
+from askKondakova.settings import LOGIN_URL
 
 MAX_ELEMENTS_IN_PAGE = 10
 
@@ -185,7 +186,32 @@ def new_question(request):
 
 
 @require_POST
-@login_required
 def vote(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'redirect': request.build_absolute_uri(LOGIN_URL)})
     data = request.POST
-    return JsonResponse({'qrating': 42})
+    action = data['action']
+    rate_object_id = int(data['rate_object_id'])
+    object_type = data['type']
+    is_like = True if action == 'like' else False
+    vote_model = QuestionVote if object_type == 'question' else AnswerVote
+    rate_object_model = Question if object_type == 'question' else Answer
+    try:
+        q = vote_model.objects.get(author_id=request.user.id,
+                              rate_object_id=rate_object_id, )
+        if q.is_like == is_like:
+            q.delete()
+        else:
+            q.is_like = is_like
+            q.save()
+    except vote_model.DoesNotExist:
+        print("not exist")
+        q = vote_model(
+            author_id=request.user.id,
+            rate_object_id=rate_object_id,
+            is_like=is_like,
+        )
+        q.save()
+    rate_object = rate_object_model.objects.get(id=rate_object_id)
+    rate_object.update_rating()
+    return JsonResponse({'qrating': rate_object.rating})

@@ -113,15 +113,18 @@ class Command(BaseCommand):
         )
         for i in range(count):
             try:
-                q = AnswerVote.objects.get(author_id=choice(user_ids),
-                                             rate_object_id=choice(answer_ids), )
+                a = AnswerVote.objects.get(author_id=choice(user_ids),
+                                           rate_object_id=choice(answer_ids), )
             except AnswerVote.DoesNotExist:
-                q = AnswerVote(
+                a = AnswerVote(
                     author_id=choice(user_ids),
                     rate_object_id=choice(answer_ids),
                 )
-            q.isLike = choice([True, False])
-            q.save()
+            a.is_like = choice([True, False])
+            a.save()
+        answers = Answer.objects.all()
+        for i in answers:
+            i.update_rating()
 
     def fill_question_likes(self, count):
         question_ids = list(
@@ -139,5 +142,8 @@ class Command(BaseCommand):
                     author_id=choice(user_ids),
                     rate_object_id=choice(question_ids),
                 )
-            q.isLike = choice([True, False])
+            q.is_like = choice([True, False])
             q.save()
+        questions = Question.objects.all()
+        for i in questions:
+            i.update_rating()

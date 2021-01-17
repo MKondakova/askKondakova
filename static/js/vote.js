@@ -1,15 +1,49 @@
-$('.js-vote').click(function (ev) {
-    ev.preventDefault();
+$('.rating').each(function (ev) {
+    const rating_field = $(this).find('.rating-field');
+    const btns = $(this).find('.js-vote-btn');
+    btns.click(function (ev) {
+        ev.preventDefault();
+        const $this = $(this),
+            action = $this.data('action'),
+            rate_object_id = $this.data('qid'),
+            type = $this.data('type');
+        $.ajax('/vote/', {
+            method: 'POST',
+            data: {action: action, rate_object_id: rate_object_id, type: type},
+            dataType: "json",
+            /*statusCode: {
+                302: function (data) {
+                    console.log("log")
+                    if (data['redirect']) {
+                    console.log("wind")
+                        window.location = data['redirect'];
+                    }
+                },
+                200: function (data) {
+                    if ($this.hasClass('selected')) {
+                        $this.removeClass('selected')
+                    } else {
+                        btns.removeClass('selected')
+                        $this.addClass('selected')
+                    }
+                    rating_field.html(data.qrating);
+                }
 
-    var $this = $(this),
-        action = $this.data('action'),
-        qid = $this.data('qid');
-    $.ajax('/vote/', {
-        method: 'POST',
-        data: {action: action, qid: qid},
-    }).done(function (data) {
-        console.log('data: ' + data)
+            },*/
+        }).done(function (data) {
+            if (data['redirect']) {
+                console.log(data['redirect'])
+                window.location = data['redirect'];
+            } else {
+                if ($this.hasClass('selected')) {
+                    $this.removeClass('selected')
+                } else {
+                    btns.removeClass('selected')
+                    $this.addClass('selected')
+                }
+                rating_field.html(data.qrating);
+            }
+        });
     });
-    console.log(action + ' ' + qid)
 
 })

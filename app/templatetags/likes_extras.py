@@ -9,7 +9,7 @@ register = template.Library()
 def has_vote(votes, rate_object_id, user_id):
     try:
         vote = votes.get(author_id=user_id, rate_object_id=rate_object_id)
-        vote = vote.isLike
+        vote = vote.is_like
         vote = 1 if vote else -1
     except (AnswerVote.DoesNotExist, QuestionVote.DoesNotExist):
         vote = 0
