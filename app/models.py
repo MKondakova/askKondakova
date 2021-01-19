@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
 MAX_TITLE_LENGTH = 50
 MAX_TAG_LENGTH = 30
@@ -78,6 +78,17 @@ class Answer(models.Model):
     objects = AnswerManager()
     is_correct = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        if self.is_correct:
+            try:
+                temp = Answer.objects.get(question_id=self.question_id, is_correct=True)
+                if self != temp:
+                    temp.is_correct=False
+                    temp.save()
+            except Answer.DoesNotExist:
+                pass
+        super(Answer, self).save(*args, **kwargs)
+
     def update_rating(self):
         self.rating = AnswerVote.objects.get_rating(self.id)
         self.save()
@@ -96,12 +107,31 @@ class VoteManager(models.Manager):
     def get_rating(self, primary_key):
         return self.get_likes(primary_key) - self.get_dislikes(primary_key)
 
+    def set_or_change_vote(self, author_id, rate_object_id, is_like):
+        try:
+            q = self.get(author_id=author_id, rate_object_id=rate_object_id, )
+            if q.is_like == is_like:
+                q.delete()
+            else:
+                q.is_like = is_like
+                q.save()
+        except self.model.DoesNotExist:
+            q = self.model(
+                author_id=author_id,
+                rate_object_id=rate_object_id,
+                is_like=is_like,
+            )
+            q.save()
+
 
 class QuestionVote(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     is_like = models.BooleanField()
     rate_object = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="votes")
     objects = VoteManager()
+
+    class Meta:
+        unique_together = ['author', 'rate_object']
 
 
 class AnswerVote(models.Model):

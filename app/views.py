@@ -192,10 +192,6 @@ def make_correct(request):
     data = request.POST
     answer_id = data['answer_id']
     question_id = data['question_id']
-    correct_answer = Answer.objects.get_correct_answer(question_id)
-    if len(correct_answer) == 1:
-        correct_answer[0].is_correct = False
-        correct_answer[0].save()
     current_answer = Answer.objects.get(id=answer_id)
     current_answer.is_correct = True
     current_answer.save()
@@ -213,21 +209,7 @@ def vote(request):
     is_like = True if action == 'like' else False
     vote_model = QuestionVote if object_type == 'question' else AnswerVote
     rate_object_model = Question if object_type == 'question' else Answer
-    try:
-        q = vote_model.objects.get(author_id=request.user.id,
-                                   rate_object_id=rate_object_id, )
-        if q.is_like == is_like:
-            q.delete()
-        else:
-            q.is_like = is_like
-            q.save()
-    except vote_model.DoesNotExist:
-        q = vote_model(
-            author_id=request.user.id,
-            rate_object_id=rate_object_id,
-            is_like=is_like,
-        )
-        q.save()
+    vote_model.objects.set_or_change_vote(request.user.id, rate_object_id, is_like)
     rate_object = rate_object_model.objects.get(id=rate_object_id)
     rate_object.update_rating()
     return JsonResponse({'qrating': rate_object.rating})
