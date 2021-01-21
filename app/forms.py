@@ -3,7 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 
 from .models import Question, Answer, User, Profile, Tag, MAX_TITLE_LENGTH, MAX_TAG_LENGTH, MAX_NICK_NAME_LENGTH, \
-    MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_TAGS_PER_QUESTION
+    MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_TAGS_PER_QUESTION, QuestionVote, AnswerVote
 
 
 class LoginForm(forms.Form):
@@ -42,7 +42,9 @@ class RegistrationForm(forms.ModelForm):
 
 
 class QuestionForm(forms.ModelForm):
-    tags = forms.CharField(help_text='Enter tags with whitespaces. Length of tag must be less then %s symbols' % MAX_TAG_LENGTH, required=False)
+    tags = forms.CharField(
+        help_text='Enter tags with whitespaces. Length of tag must be less then %s symbols' % MAX_TAG_LENGTH,
+        required=False)
 
     def __init__(self, user, *args, **kwargs):
         self._user = user
@@ -113,3 +115,53 @@ class SettingsForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['nick_name', 'avatar']
+
+
+class VoteForm(forms.Form):
+    action = forms.CharField(max_length=8)
+    object_type = forms.CharField(max_length=9)
+    rate_object_id = forms.IntegerField(min_value=0)
+
+    def __init__(self, user_id, *args, **kwargs):
+        self._user_id = user_id
+        super(VoteForm, self).__init__(*args, **kwargs)
+
+
+    def clean_object_type(self):
+        object_type = self.cleaned_data.get('object_type')
+        if not (object_type == 'question' or object_type == 'answer'):
+            raise ValidationError('Wrong type format')
+        return object_type
+
+    def clean_action(self):
+        action = self.cleaned_data.get('action')
+        if action == 'like' or action == 'dislike':
+            action = True if action == 'like' else False
+        else:
+            raise ValidationError('Wrong action format')
+        return action
+
+    def save(self, commit=True):
+        vote_model = QuestionVote if self.cleaned_data.get('object_type') == 'question' else AnswerVote
+        rate_object_model = Question if self.cleaned_data.get('object_type') == 'question' else Answer
+        vote_model.objects.set_or_change_vote(self._user_id, self.cleaned_data.get('rate_object_id'),
+                                              self.cleaned_data.get('action'))
+        rate_object = rate_object_model.objects.get(id=self.cleaned_data.get('rate_object_id'))
+        if commit:
+            rate_object.update_rating()
+        return rate_object
+
+
+class MakeCorrectForm(forms.Form):
+    answer_id = forms.IntegerField(min_value=0)
+
+    def save(self, commit=True):
+        answer_id = self.cleaned_data.get('answer_id')
+        try:
+            current_answer = Answer.objects.get(id=answer_id)
+            current_answer.is_correct = True
+            if commit:
+                current_answer.save()
+        except Answer.DoesNotExist:
+            current_answer = None
+        return current_answer

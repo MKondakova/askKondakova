@@ -189,12 +189,9 @@ def new_question(request):
 def make_correct(request):
     if not request.user.is_authenticated:
         return JsonResponse({'redirect': request.build_absolute_uri(LOGIN_URL)})
-    data = request.POST
-    answer_id = data['answer_id']
-    question_id = data['question_id']
-    current_answer = Answer.objects.get(id=answer_id)
-    current_answer.is_correct = True
-    current_answer.save()
+    form = MakeCorrectForm(request.POST)
+    if form.is_valid():
+        form.save()
     return JsonResponse({})
 
 
@@ -202,14 +199,10 @@ def make_correct(request):
 def vote(request):
     if not request.user.is_authenticated:
         return JsonResponse({'redirect': request.build_absolute_uri(LOGIN_URL)})
-    data = request.POST
-    action = data['action']
-    rate_object_id = int(data['rate_object_id'])
-    object_type = data['type']
-    is_like = True if action == 'like' else False
-    vote_model = QuestionVote if object_type == 'question' else AnswerVote
-    rate_object_model = Question if object_type == 'question' else Answer
-    vote_model.objects.set_or_change_vote(request.user.id, rate_object_id, is_like)
-    rate_object = rate_object_model.objects.get(id=rate_object_id)
-    rate_object.update_rating()
-    return JsonResponse({'qrating': rate_object.rating})
+    form = VoteForm(request.user.id, request.POST)
+    if form.is_valid():
+        rate_object = form.save()
+        return JsonResponse({'qrating': rate_object.rating})
+    else:
+        print(form.errors)
+        return JsonResponse(status=400, data={'Wrong format'})

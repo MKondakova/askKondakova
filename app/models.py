@@ -83,7 +83,7 @@ class Answer(models.Model):
             try:
                 temp = Answer.objects.get(question_id=self.question_id, is_correct=True)
                 if self != temp:
-                    temp.is_correct=False
+                    temp.is_correct = False
                     temp.save()
             except Answer.DoesNotExist:
                 pass
