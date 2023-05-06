@@ -2,12 +2,12 @@
 {% load likes_extras %}
 
 <div class="question row">
-    <div class="col-md-2">
+    <div class="col-md-2 image-rating-div">
         <div class="avatar-holder">
             <img width="64" height="64" class="img-rounded" src="{{ question.author.profile.avatar.url }}">
             <div class="rating">
                 {% has_vote question.votes.all question.id request.user.id as vote %}
-                <button type="button" class="js-vote-btn btn btn-sm btn-default {% if vote == 1 %}selected{% endif %}"
+                <button type="button" class="js-vote-btn btn btn-sm btn-outline-dark btn-default {% if vote == 1 %}selected{% endif %}"
                         data-action="like" data-qid="{{ question.id }}" data-type="question">
                     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-up-fill"
                          fill="currentColor"
@@ -16,9 +16,9 @@
                     </svg>
                 </button>
                 <div class="rating-field">{{ question.rating }}</div>
-                <button type="button" class="js-vote-btn btn btn-sm btn-default {% if vote == -1 %}selected{% endif %}"
+                <button type="button" class="js-vote-btn btn btn-sm  btn-outline-dark btn-default {% if vote == -1 %}selected{% endif %}"
                         data-action="dislike" data-qid="{{ question.id }}" data-type="question">
-                    <svg width="1em" height="1em" viewBox="0 0 18 16" class="bi bi-caret-down-fill"
+                    <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-caret-down-fill"
                          fill="currentColor"
                          xmlns="http://www.w3.org/2000/svg">
                         <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"></path>
@@ -38,7 +38,7 @@
                 <div class="col-sm-10">
                     <p>Tags:
                         {% for tag in question.tags.all %}
-                            <a href="{% url 'tag_questions' tag %}">{{ tag }}</a>
+                            <a class="tag-a" href="{% url 'tag_questions' tag %}">{{ tag }}</a>
                         {% endfor %}
                     </p>
                 </div>

@@ -10,25 +10,30 @@ from .forms import *
 from askKondakova.settings import LOGIN_URL
 
 MAX_ELEMENTS_IN_PAGE = 10
-
+NUM_PAGE_LINKS = 5
 
 def paginate(request, qs):
     try:
         limit = int(request.GET.get('limit', MAX_ELEMENTS_IN_PAGE))
     except ValueError:
         limit = MAX_ELEMENTS_IN_PAGE
-    if limit > 100:
+    if limit > MAX_ELEMENTS_IN_PAGE:
         limit = MAX_ELEMENTS_IN_PAGE
     try:
-        page = int(request.GET.get('page', 1))
+        page_number = int(request.GET.get('page', 1))
     except ValueError:
         raise Http404
     paginator = Paginator(qs, limit)
     try:
-        page = paginator.page(page)
+        page_obj = paginator.get_page(page_number)
     except EmptyPage:
-        page = paginator.page(paginator.num_pages)
-    return page
+        page_obj = paginator.get_page(paginator.num_pages)
+
+    start_index = max(1, page_obj.number - NUM_PAGE_LINKS)
+    end_index = min(paginator.num_pages, page_obj.number + NUM_PAGE_LINKS)
+
+    page_links = [i for i in range(start_index, end_index + 1)]
+    return {'page_obj': page_obj, 'page_links': page_links}
 
 
 def new_questions(request):
@@ -37,7 +42,7 @@ def new_questions(request):
     names = User.objects.all()[:10]
     page = paginate(request, questions)
     return render(request, 'new_questions.html', {
-        'questions': page.object_list,
+        'questions': page['page_obj'].object_list,
         'page': page,
         'tags': tags,
         'names': names,
@@ -51,7 +56,7 @@ def hot_questions(request):
 
     page = paginate(request, questions)
     return render(request, 'hot_questions.html', {
-        'questions': page.object_list,
+        'questions': page['page_obj'].object_list,
         'page': page,
         'tags': tags,
         'names': names,
@@ -66,7 +71,7 @@ def tag_news(request, tag_type):
     page = paginate(request, questions)
     return render(request, 'tag_page.html', {
         'tag': tag_type,
-        'questions': page.object_list,
+        'questions': page['page_obj'].object_list,
         'page': page,
         'tags': tags,
         'names': names,
