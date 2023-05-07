@@ -3,7 +3,7 @@ from django.db import models
 
 MAX_TITLE_LENGTH = 50
 MAX_TAG_LENGTH = 30
-MAX_NICK_NAME_LENGTH = 30
+MAX_NICKNAME_LENGTH = 30
 MAX_USERNAME_LENGTH = 150
 MAX_PASSWORD_LENGTH = 128
 MAX_TAGS_PER_QUESTION = 10
@@ -12,7 +12,7 @@ MAX_TAGS_PER_QUESTION = 10
 class Profile(models.Model):
     avatar = models.ImageField(upload_to='avatars/%Y/%m/%d', default='avatars/default_pic.png')
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    nick_name = models.CharField(max_length=MAX_NICK_NAME_LENGTH)
+    nickname = models.CharField(max_length=MAX_NICKNAME_LENGTH)
 
 
 class Tag(models.Model):

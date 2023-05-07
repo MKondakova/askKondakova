@@ -87,7 +87,7 @@ class Command(BaseCommand):
                    'avatars/unicorn.jpg', 'avatars/pigeon.jpeg', 'avatars/tiger.jpeg']
         for i in range(count):
             user = User.objects.create_user(username=f.unique.user_name(), email=f.email())
-            Profile.objects.create(avatar=choice(avatars), user=user, nick_name=user.username)
+            Profile.objects.create(avatar=choice(avatars), user=user, nickname=user.username)
 
     def fill_answers(self, count):
         question_ids = list(

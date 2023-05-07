@@ -2,7 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import Question, Answer, User, Profile, Tag, MAX_TITLE_LENGTH, MAX_TAG_LENGTH, MAX_NICK_NAME_LENGTH, \
+from .models import Question, Answer, User, Profile, Tag, MAX_TITLE_LENGTH, MAX_TAG_LENGTH, MAX_NICKNAME_LENGTH, \
     MAX_USERNAME_LENGTH, MAX_PASSWORD_LENGTH, MAX_TAGS_PER_QUESTION, QuestionVote, AnswerVote
 
 
@@ -12,15 +12,15 @@ class LoginForm(forms.Form):
 
 
 class RegistrationForm(forms.ModelForm):
-    nick_name = forms.CharField(max_length=MAX_NICK_NAME_LENGTH)
+    nickname = forms.CharField(max_length=MAX_NICKNAME_LENGTH)
     password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
     repeat_password = forms.CharField(widget=forms.PasswordInput, max_length=MAX_PASSWORD_LENGTH)
     avatar = forms.ImageField(required=False)
 
     def save(self, commit=True):
-        user = User(username=self.cleaned_data.get('username'), email=self.cleaned_data.get('email'),
-                    password=self.cleaned_data.get('password'), )
-        profile = Profile(nick_name=self.cleaned_data.get('nick_name'), user=user)
+        user = User(username=self.cleaned_data.get('username'), email=self.cleaned_data.get('email'))
+        user.set_password(self.cleaned_data.get('password'))
+        profile = Profile(nickname=self.cleaned_data.get('nickname'), user=user)
 
         if self.cleaned_data.get('avatar') is not None:
             profile.avatar = self.cleaned_data.get('avatar')
@@ -114,7 +114,7 @@ class SettingsForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ['nick_name', 'avatar']
+        fields = ['nickname', 'avatar']
 
 
 class VoteForm(forms.Form):
